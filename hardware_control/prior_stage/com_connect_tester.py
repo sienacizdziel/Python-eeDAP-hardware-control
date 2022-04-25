@@ -1,3 +1,4 @@
+from xmlrpc.client import Boolean
 import serial
 import threading
 
@@ -41,9 +42,9 @@ class _PriorConnection:
     def __init__(self, port: str) -> None: #, baudrate: int, timeout: float) -> None:
         self._serial = serial.Serial(
             port=port,
-            baudrate=9600, # based on eeDAP source code
+            baudrate= 9600, # based on eeDAP source code
             timeout=3, # also based on eeDAP source code
-            # bytesize=serial.EIGHTBITS, # --> because not included in eeDAP source code
+            bytesize=serial.EIGHTBITS, # --> TODO: because not included in eeDAP source code
             stopbits=serial.STOPBITS_ONE,
             parity=serial.PARITY_NONE,
             xonxoff=False,
@@ -74,46 +75,59 @@ class _PriorConnection:
         with self.lock:
             return self._serial.readline(size)
 
-def send_com_prior_stage(serial_port:_PriorConnection, command:str):
+    def close(self) -> None:
+        return self._serial.close()
+
+# returns the number of bytes written to the specified serial port
+# otherwise, on error, returns -1
+def send_com_prior_stage(serial_port:_PriorConnection, command:str) -> int:
     # for each char in the command, send to the stage
     # for i in command:
     #     serial_port.write(i)
     try:
         # send command string as bytes
         # serial_port.write(bytes(command, encoding='utf-8'))
-        command_b = bytes(command, encoding='utf-8')
-        for i in range(len(command_b)):
-            # print(bytes(command[i], encoding='utf-8'))
-            serial_port.write(command_b[i])
+        # command_b = bytes(command, encoding='utf-8')
+        command_new = command + "\r\n"
+        # print(command_new)
+        command_b = bytes(command_new.encode())
+        # for i in range(len(command_b)):
+        #     print(bytes(command[i], encoding='utf-8'))
+        #     serial_port.write(bytes(command[i], encoding='utf-8'))
+            # serial_port.write(command_b[i])
 
-        # serial_port.write(command)
+        # must be encoded to bytes (unicode strings not supported)
+        # prints number of bytes written
+        # print(serial_port.write(command_b))
+        serial_port.write(command_b)
 
         # send the termination char
         # serial_port.write(bytes(13, encoding='utf-8'))
 
         serial_answer = serial_port.readline()
 
-        print(serial_answer)
-        print(serial_answer.decode('utf-8'))
+        # print(serial_answer)
+        # print(serial_answer.decode('utf-8'))
+        print(serial_answer.decode("ASCII"))
 
         # error messages from stage
         # TODO compare to byte strings?
-        if serial_answer == b'E,1':
+        if serial_answer == b'E,1\r':
             print("No Prior Stage connected")
             serial_answer = -1
-        if serial_answer == b'E,2':
+        if serial_answer == b'E,2\r':
             print("Prior Stage not idle")
             serial_answer = -1
-        if serial_answer == b'E,3':
+        if serial_answer == b'E,3\r':
             print("No Prior driver")
             serial_answer = -1 
-        if serial_answer == b'E,4':
+        if serial_answer == b'E,4\r':
             print("String parsing error")
             serial_answer = -1
-        if serial_answer == b'E,5':
+        if serial_answer == b'E,5\r':
             print("Command for Prior Stage not found")
             serial_answer = -1
-        if serial_answer == b'E,8':
+        if serial_answer == b'E,8\r':
             print("Value out of range")
             serial_answer = -1
     except Exception as e:
