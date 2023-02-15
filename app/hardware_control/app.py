@@ -1,6 +1,8 @@
-from flask import Flask, redirect, url_for, render_template
+from flask import Flask, redirect, url_for, render_template, Response, request
+import cv2
 
 from proscan import PriorStage
+from camera import Grasshopper3Camera
 
 app = Flask(__name__)
 
@@ -26,6 +28,16 @@ def stage_test():
     # close serial port communication
     p.close()
     return render_template('running_test_page.html')
+
+@app.route('/camera', methods=['GET', 'POST'])
+def camera():
+    if request.method == 'POST':
+        cam.take_image()
+        return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    else:
+        print("showing live image")
+        cam = Grasshopper3Camera()
+        return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
