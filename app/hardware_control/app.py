@@ -31,6 +31,7 @@ def stage_test():
 
 @app.route('/camera', methods=['GET', 'POST'])
 def camera():
+    # take an image on a post request (untested)
     if request.method == 'POST':
         cam.take_image()
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')

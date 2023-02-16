@@ -9,14 +9,18 @@ from matplotlib import pyplot as plt
 # generalizability to all 3 eeDAP-supported cameras
     # digital interface is USB for Blenman lab camera but IEEE-1394b for others
 # eyepiece offset
-
-# cv2.videoCapture(PATH / ID)
-# cap.read() for individually accessing frames
 # read from .dapsi file for camera type
+
+# methods from eedap matlab code:
+    # open camera (camera_open.m)
+    # take image (camera_take_image.m)
+
+# abstract class for camera
 class Camera():
     def __init__(self):
         pass
 
+# blenman lab camera type
 class Grasshopper3Camera(Camera):
     def __init__(self, device=0):
         """ initialize video capture with device number """
@@ -41,7 +45,3 @@ class Grasshopper3Camera(Camera):
         cv2.imwrite('image.jpg', frame) # photo name
 
         # cap.release() releases a webcam device
-
-    # abstract methods:
-    # open camera (camera_open.m)
-    # take image (camera_take_image.m)
