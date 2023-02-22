@@ -1,0 +1,9 @@
+<html>
+    <body>
+        Live camera image
+        <form action="" method="post">
+            <button name="take_image">Take image</button>
+        </form>
+        <img src="{{ url_for('video_feed') }}" width="100%">
+    </body>
+</html>

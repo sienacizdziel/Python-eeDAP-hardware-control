@@ -1,0 +1,37 @@
+2022-04-21T13:29:28.363505 tid5276 [IFO,LogManager] Enabled primary log file C:\victorias_eedap_tester\integrate_microscope_python\Integrate_Microscope_eeDAP\CoreLogs\CoreLog20220421T132928_pid1280.txt
+2022-04-21T13:29:28.363505 tid5276 [IFO,App] User: Brandon Gallas
+2022-04-21T13:29:28.364501 tid5276 [IFO,App] Host: DESKTOP-UHVE8AL
+2022-04-21T13:29:28.364501 tid5276 [IFO,App] MM Studio version: 2.0.1 20220420
+2022-04-21T13:29:28.364501 tid5276 [IFO,App] MMCore version 10.2.0
+2022-04-21T13:29:28.364501 tid5276 [IFO,App] Device API version 70, Module API version 10
+2022-04-21T13:29:28.364501 tid5276 [IFO,App] Operating System: Windows 10 (amd64) 10.0
+2022-04-21T13:29:28.364501 tid5276 [IFO,App] JVM: Java HotSpot(TM) 64-Bit Server VM, version 1.8.0_152, 64-bit
+2022-04-21T13:29:28.372390 tid5276 [IFO,App] Finished waiting for plugins to load
+2022-04-21T13:29:28.437502 tid5276 [IFO,Core] Did unload all devices
+2022-04-21T13:29:28.437667 tid5276 [IFO,Core] Did unload all devices
+2022-04-21T13:29:28.438468 tid5276 [IFO,Core] Did load device COM4 from SerialManager; label = COM4
+2022-04-21T13:29:28.439521 tid5276 [IFO,Core] Did load device XYStage from Prior; label = XYStage
+2022-04-21T13:29:28.439521 tid5276 [IFO,Core] Will initialize 2 devices
+2022-04-21T13:29:28.439521 tid5276 [IFO,Core] Will initialize device COM4
+2022-04-21T13:29:28.440966 tid5276 [IFO,dev:COM4] Setting standard USB to Serial settings
+2022-04-21T13:29:28.447836 tid5276 [IFO,Core] Did initialize device COM4
+2022-04-21T13:29:28.447836 tid5276 [IFO,Core] Will initialize device XYStage
+2022-04-21T13:29:28.984414 tid5276 [IFO,Core] Did initialize device XYStage
+2022-04-21T13:29:28.984414 tid5276 [IFO,Core] Default xy stage set to XYStage
+2022-04-21T13:29:28.984414 tid5276 [IFO,Core] Finished initializing 2 devices
+2022-04-21T13:29:29.207791 tid5276 [IFO,Core] Did update system state cache
+2022-04-21T13:29:29.460396 tid5276 [IFO,App] EDTHangLogger: Started monitoring of EDT hangs
+                                   [       ] [heartbeat timeout = 4500 ms, hang check interval = 1000 ms]
+2022-04-21T13:29:29.912553 tid5276 [IFO,App] Rebuilding config group table
+2022-04-21T13:29:29.912553 tid5276 [IFO,App] Finished rebuilding config group table
+2022-04-21T13:29:29.923598 tid5276 [IFO,App] Startup script (C:\victorias_eedap_tester\integrate_microscope_python\Integrate_Microscope_eeDAP\MMStartup.bsh) not present
+2022-04-21T13:29:29.923598 tid5276 [IFO,App] Updating GUI; config pad = true; from cache = false
+2022-04-21T13:29:30.168590 tid5276 [IFO,Core] Did update system state cache
+2022-04-21T13:29:30.169574 tid5276 [IFO,App] Rebuilding config group table
+2022-04-21T13:29:30.169574 tid5276 [IFO,App] Finished rebuilding config group table
+2022-04-21T13:29:30.169574 tid5276 [IFO,App] Finished updating GUI
+2022-04-21T13:29:30.242851 tid5276 [IFO,App] Initialized ZMQ Server on port: 4827
+2022-04-21T13:29:47.075546 tid5276 [IFO,App] EDTHangLogger: Stopping monitoring of EDT hangs
+2022-04-21T13:29:47.397635 tid5276 [IFO,Core] Did unload all devices
+2022-04-21T13:29:47.397635 tid5276 [IFO,Core] System reset
+2022-04-21T13:29:47.399301 tid5276 [IFO,Core] Core session ended

@@ -1,0 +1,7 @@
+future==0.18.2
+iso8601==1.0.2
+pyserial==3.5
+PyYAML==6.0
+flask
+opencv-python==4.6.0.66 # version 10.15.7 MacOS
+matplotlib
