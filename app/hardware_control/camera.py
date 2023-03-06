@@ -1,7 +1,8 @@
 ''' dependencies ''' 
-import cv2 
+import cv2, PySpin, queue
+import numpy as np
 from matplotlib import pyplot as plt
-import PySpin 
+
 # PySpin is a python wrapper for the Spinnaker library
 # Spinnaker SDK is FLIR's next generation GenlCam3 API library for cameras
 # supports FLIR pointgrey cameras
@@ -27,26 +28,32 @@ class Camera():
 class Grasshopper3Camera(Camera):
     def __init__(self, device=0):
         """ initialize video capture with device number """
-        # for i in range(10): 
-        #   self.cap = cv2.VideoCapture(i)
-        #   print(str(i) + ": " + str(self.cap.read()[0]))
-        #   self.cap.release()
-        # self.cap = cv2.VideoCapture(1)
+        # initialize specified camera
         system = PySpin.System.GetInstance()
         cam_list = system.GetCameras()
-        cam = cam_list.GetByIndex(0)
-        cam.Init()
-        print(cam)
-        cam.AcquisitionMode.SetValue(PySpin.AcquisitionMode_SingleFrame)
-        cam.BeginAcquisition()
-        image_primary = cam.GetNextImage()
-        width = image_primary.GetWidth()
-        height = image_primary.GetHeight()
-        print("width: " + str(width) + ", height: " + str(height))
-        image_array = image_primary.GetData()
-        image_primary.Save('test.jpg') 
-        cam.EndAcquisition()
-        cam.DeInit()
+        self.cam = cam_list.GetByIndex(device)
+        self.cam.Init()
+
+        # set continuous acquisition for video streaming
+        self.cam.AcquisitionMode.SetValue(PySpin.AcquisitionMode_Continuous)
+        # cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
+        # cam.AcquisitionFrameRateEnable.SetValue(False)
+
+        # get framerate and other parameters
+        self.frame_rate = self.cam.AcquisitionResultingFrameRate()
+
+        # cam.AcquisitionMode.SetValue(PySpin.AcquisitionMode_SingleFrame)
+        self.cam.BeginAcquisition()
+        frame = self.cam.GetNextImage()
+        # width = image_primary.GetWidth()
+        # height = image_primary.GetHeight()
+        # print("width: " + str(width) + ", height: " + str(height))
+
+        # convert PySpin ImagePtr into numpy array
+        image = np.array(frame.GetData(), dtype="uint8").reshape(frame.getHeight(), frame.getWidth())
+        image.Save('test.jpg') 
+        self.cam.EndAcquisition()
+        self.cam.DeInit()
         print(cam_list)
 
     def camera_preview(self):
@@ -63,11 +70,8 @@ class Grasshopper3Camera(Camera):
                 yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
     def take_image(self):
-        """  """
-        ret, frame = self.cap.read()
-        cv2.imwrite('image.jpg', frame) # photo name
-
-        # cap.release() releases a webcam device
+        """ capture an image frame from video """
+        
 
     # abstract methods:
     # open camera (camera_open.m)
