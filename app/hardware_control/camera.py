@@ -1,5 +1,6 @@
 ''' dependencies ''' 
-import cv2, PySpin, queue
+import cv2, queue
+import PySpin
 import numpy as np
 from matplotlib import pyplot as plt
 import tkinter as tk

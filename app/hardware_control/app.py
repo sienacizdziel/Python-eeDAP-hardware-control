@@ -29,6 +29,17 @@ def stage_test():
     p.close()
     return render_template('running_test_page.html')
 
+@app.route('/admin_screen', methods=['GET', 'POST'])
+def admin_screen():
+    if request.method == 'POST':
+        # reads data from uploaded dapsi file
+        f = request.files['file']
+        f.save(f.filename)
+        print(f)
+        return redirect('/camera')
+    else:
+        return render_template('admin_screen.html')
+
 @app.route('/camera', methods=['GET', 'POST'])
 # route for testing the camera
 def camera():
