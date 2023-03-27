@@ -53,15 +53,19 @@ class Grasshopper3Camera(Camera):
         self.cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
         self.cam.ExposureMode.SetValue(PySpin.ExposureMode_Timed)
         self.cam.ExposureTime.SetValue(EXPOSURE_TIME)
-        self.cam.AcquisitionFrameRateEnable.SetValue(False)
+        nodemap = self.cam.GetNodeMap()
+        # frame_rate_auto_node = PySpin.CEnumerationPtr(nodemap.GetNode("AcquisitionFrameRateAuto"))
+        enable_rate_mode = PySpin.CBooleanPtr(nodemap.GetNode("AcquisitionFrameRateEnabled"))
+        enable_rate_mode.SetValue(False)
         # cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
         # cam.AcquisitionFrameRateEnable.SetValue(False)
 
         # get frame rate and other parameters
         self.seconds = 10
-        self.frame_rate = self.cam.AcquisitionResultingFrameRate()
+        self.frame_rate = 163 # need to pull this somehow
+        print(self.frame_rate)
         self.num_images = round(self.frame_rate * self.seconds) # calculation based on number of frames per second
-        print("frame rate: " + self.frame_rate)
+        # print("frame rate: " + self.frame_rate)
 
         # initialize tkinter for video output
         self.window = tk.Tk()
@@ -75,6 +79,10 @@ class Grasshopper3Camera(Camera):
         self.imglabel.place(x=10, y=20)
         self.window.update()
 
+        self.cam.BeginAcquisition()
+        print("here!")
+        # self.window.mainloop()
+
         # set up a thread to accelerate saving
           
           # image.Save('test.jpg') 
@@ -85,9 +93,9 @@ class Grasshopper3Camera(Camera):
     def camera_preview(self):
         """ display preview of camera """
         """ references camera_open.m from eeDAP """
+        print("here??")
         # cam.AcquisitionMode.SetValue(PySpin.AcquisitionMode_SingleFrame)
         self.cam.BeginAcquisition()
-        frame = self.cam.GetNextImage()
         # width = image_primary.GetWidth()
         # height = image_primary.GetHeight()
         # print("width: " + str(width) + ", height: " + str(height))
@@ -96,8 +104,10 @@ class Grasshopper3Camera(Camera):
         image_queue = queue.Queue()
 
         # loop through images in video
+        print("here")
+        print(self.num_images)
         for i in range(self.num_images):
-
+          frame = self.cam.GetNextImage()
           # convert PySpin ImagePtr into numpy array
           image = np.array(frame.GetData(), dtype="uint8").reshape(frame.getHeight(), frame.getWidth())
           image_queue.put(image)

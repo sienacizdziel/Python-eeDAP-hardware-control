@@ -49,7 +49,9 @@ def camera():
     else:
         print("showing live image")
         cam = Grasshopper3Camera()
-        return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        cam.camera_preview()
+        return render_template('camera.html')
+        # return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
