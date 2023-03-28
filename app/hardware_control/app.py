@@ -49,6 +49,7 @@ def camera():
     else:
         print("showing live image")
         cam = Grasshopper3Camera()
+        print("outside cam")
         cam.camera_preview()
         return render_template('camera.html')
         # return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
