@@ -2,7 +2,7 @@ from flask import Flask, redirect, url_for, render_template, Response, request, 
 from flask_session import session
 import cv2
 
-from proscan import PriorStage
+from prior_stage.proscan import PriorStage
 from camera import Grasshopper3Camera
 
 app = Flask(__name__)
@@ -18,7 +18,8 @@ def stage_test():
 
     # initialize communication with Prior ProScan III
     # input the appropriate COM port
-    p = PriorStage("COM4")
+    # p = PriorStage("COM4")
+    p = PriorStage("/dev/ttyACM0")
 
     # # testing: move to provided coordinates
     # # coordinate provided in JSON format
@@ -65,4 +66,4 @@ def camera():
         # return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port='5000')

@@ -1,11 +1,17 @@
 FROM python:3
 
-ADD ./app.py ./proscan.py ./base_stage.py ./check_ports.py /
+COPY ./requirements.txt /app/requirements.txt
 
-RUN pip install future==0.18.2
-RUN pip install iso8601==1.0.2
-RUN pip install pyserial==3.5
-RUN pip install PyYAML==6.0
-RUN pip install Flask
+WORKDIR /app
+
+ENV FLASK_APP=app.py
+
+ENV FLASK_APP=0.0.0.0
+
+RUN pip install -r requirements.txt
+
+EXPOSE 5000
+
+COPY . /app
 
 CMD [ "python", "./app.py" ]

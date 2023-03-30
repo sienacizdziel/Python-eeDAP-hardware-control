@@ -23,17 +23,20 @@ class _PriorConnection:
     """
 
     def __init__(self, port: str) -> None:
-        self._serial = serial.Serial(
-            port=port,
-            baudrate=9600, # based on eeDAP source code
-            timeout=3, # also based on eeDAP source code
-            bytesize=serial.EIGHTBITS, # using an 8 bit word
-            stopbits=serial.STOPBITS_ONE, # one stop bit
-            parity=serial.PARITY_NONE, # no parity or handshake
-            xonxoff=False,
-            rtscts=False,
-            dsrdtr=False,
-        )
+        try:
+            self._serial = serial.Serial(
+              port=port,
+              baudrate=9600, # based on eeDAP source code
+              timeout=3, # also based on eeDAP source code
+              bytesize=serial.EIGHTBITS, # using an 8 bit word
+              stopbits=serial.STOPBITS_ONE, # one stop bit
+              parity=serial.PARITY_NONE, # no parity or handshake
+              xonxoff=False,
+              rtscts=False,
+              dsrdtr=False,
+          )
+        except:
+            raise
 
         self._lock = threading.RLock()
 

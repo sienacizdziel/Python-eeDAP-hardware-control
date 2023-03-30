@@ -1,6 +1,6 @@
 ''' dependencies ''' 
 import cv2, queue
-# import PySpin
+import PySpin
 import numpy as np
 from matplotlib import pyplot as plt
 import tkinter as tk
@@ -25,7 +25,7 @@ from PIL import Image, ImageTk
 IMAGE_HEIGHT = 240
 IMAGE_WIDTH = 320
 EXPOSURE_TIME = 500 # in microseconds
-# PIXEL_FORMAT = PySpin.PixelFormat_RGB8
+PIXEL_FORMAT = PySpin.PixelFormat_RGB8
 
 # cv2.videoCapture(PATH / ID)
 # cap.read() for individually accessing frames

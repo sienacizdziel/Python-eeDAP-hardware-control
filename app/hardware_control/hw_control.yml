@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  hardware_control:
+    image: stage_mover
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    # devices:
+    #   - "/dev/ttyACM0:/dev/ttyACM0"
