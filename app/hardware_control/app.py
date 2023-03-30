@@ -1,4 +1,5 @@
-from flask import Flask, redirect, url_for, render_template, Response, request
+from flask import Flask, redirect, url_for, render_template, Response, request, session
+from flask_session import session
 import cv2
 
 from proscan import PriorStage
@@ -19,11 +20,15 @@ def stage_test():
     # input the appropriate COM port
     p = PriorStage("COM4")
 
-    # testing: move to provided coordinates
-    # coordinate provided in JSON format
-    # if the stage is already at those coordinates, it will not move
-    p.move_to({'x': -100000, 'y': -100000})
-    p.move_to({'x': 100000, 'y': 100000})
+    # # testing: move to provided coordinates
+    # # coordinate provided in JSON format
+    # # if the stage is already at those coordinates, it will not move
+    # p.move_to({'x': -100000, 'y': -100000})
+    # p.move_to({'x': 100000, 'y': 100000})
+
+    # visit each ROI coordinate
+    for x, y in session['roi_coords']:
+        p.move_to({'x': x, 'y': y})
 
     # close serial port communication
     p.close()
@@ -36,6 +41,11 @@ def admin_screen():
         f = request.files['file']
         f.save(f.filename)
         print(f)
+
+        # data within GUI.m (myData) in MATLAB
+        session['roi_coords'] = None
+        print(session['roi_coords'])
+
         return redirect('/camera')
     else:
         return render_template('admin_screen.html')
