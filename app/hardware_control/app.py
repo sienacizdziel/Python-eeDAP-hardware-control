@@ -1,11 +1,14 @@
 from flask import Flask, redirect, url_for, render_template, Response, request, session
-from flask_session import session
+from flask_session import Session
 import cv2
 
 from prior_stage.proscan import PriorStage
 from camera import Grasshopper3Camera
 
 app = Flask(__name__)
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 @app.route('/')
 def index():
@@ -40,14 +43,19 @@ def admin_screen():
     if request.method == 'POST':
         # reads data from uploaded dapsi file
         f = request.files['file']
-        f.save(f.filename)
-        print(f)
+        read_settings = False
+        with open(f.filename, "r"):
+            for line in f: 
+                if b"SETTINGS" in line:
+                    read_settings = True
+                elif read_settings:
+                    print(line)
 
         # data within GUI.m (myData) in MATLAB
         session['roi_coords'] = None
         print(session['roi_coords'])
 
-        return redirect('/camera')
+        return render_template('admin_screen.html')
     else:
         return render_template('admin_screen.html')
 
@@ -59,9 +67,9 @@ def camera():
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
     else:
         print("showing live image")
-        cam = Grasshopper3Camera()
+        # cam = Grasshopper3Camera()
         print("outside cam")
-        cam.camera_preview()
+        # cam.camera_preview()
         return render_template('camera.html')
         # return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 

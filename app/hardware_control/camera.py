@@ -67,50 +67,50 @@ class Grasshopper3Camera(Camera):
 
         # image format control
         # apply pixel format
-        node_pixel_format = PySpin.CEnumerationPtr(nodemap.GetNode("PixelFormat"))
-        if PySpin.IsAvailable(node_pixel_format) and PySpin.IsWritable(node_pixel_format):
-            # retrieve the desired entry node from the enumeration node and set as new value
-            node_pixel_format_rgb8 = PySpin.CEnumEntryPtr(node_pixel_format.GetEntryByName("RGB8"))
-            if PySpin.IsAvailable(node_pixel_format_rgb8) and PySpin.IsReadable(node_pixel_format_rgb8):
-                pixel_format_rgb8 = node_pixel_format_rgb8.GetValue()
-                node_pixel_format.SetIntValue(pixel_format_rgb8)
-                print("Pixel format set to {}".format(node_pixel_format.GetCurrentEntry().GetSymbolic()))
-            else:
-                print("Pixel format not available...")
+        # node_pixel_format = PySpin.CEnumerationPtr(nodemap.GetNode("PixelFormat"))
+        # if PySpin.IsAvailable(node_pixel_format) and PySpin.IsWritable(node_pixel_format):
+        #     # retrieve the desired entry node from the enumeration node and set as new value
+        #     node_pixel_format_rgb8 = PySpin.CEnumEntryPtr(node_pixel_format.GetEntryByName("BayerRG8"))
+        #     if PySpin.IsAvailable(node_pixel_format_rgb8) and PySpin.IsReadable(node_pixel_format_rgb8):
+        #         pixel_format_rgb8 = node_pixel_format_rgb8.GetValue()
+        #         node_pixel_format.SetIntValue(pixel_format_rgb8)
+        #         print("Pixel format set to {}".format(node_pixel_format.GetCurrentEntry().GetSymbolic()))
+        #     else:
+        #         print("Pixel format not available...")
 
-        # apply minimum to offset X
-        node_offset_x = PySpin.CIntegerPtr(nodemap.GetNode("OffsetX"))
-        if PySpin.IsAvailable(node_offset_x) and PySpin.IsWritable(node_offset_x):
-            node_offset_x.SetValue(node_offset_x.GetMin())
-            print("Offset X set to {}".format(node_offset_x.GetMin()))
-        else:
-            print("Offset X not available...")
+        # # apply minimum to offset X
+        # node_offset_x = PySpin.CIntegerPtr(nodemap.GetNode("OffsetX"))
+        # if PySpin.IsAvailable(node_offset_x) and PySpin.IsWritable(node_offset_x):
+        #     node_offset_x.SetValue(node_offset_x.GetMin())
+        #     print("Offset X set to {}".format(node_offset_x.GetMin()))
+        # else:
+        #     print("Offset X not available...")
 
-        # apply minimum to offset Y
-        node_offset_y = PySpin.CIntegerPtr(nodemap.GetNode("OffsetY"))
-        if PySpin.IsAvailable(node_offset_y) and PySpin.IsWritable(node_offset_y):
-            node_offset_y.SetValue(node_offset_y.GetMin())
-            print("Offset Y set to {}".format(node_offset_y.GetMin()))
-        else:
-            print("Offset Y not available...")
+        # # apply minimum to offset Y
+        # node_offset_y = PySpin.CIntegerPtr(nodemap.GetNode("OffsetY"))
+        # if PySpin.IsAvailable(node_offset_y) and PySpin.IsWritable(node_offset_y):
+        #     node_offset_y.SetValue(node_offset_y.GetMin())
+        #     print("Offset Y set to {}".format(node_offset_y.GetMin()))
+        # else:
+        #     print("Offset Y not available...")
 
-        # apply maximum width
-        node_width = PySpin.CIntegerPtr(nodemap.GetNode("Width"))
-        if PySpin.IsAvailable(node_width) and PySpin.IsWritable(node_width):
-            width_to_set = node_width.GetMax()
-            node_width.SetValue(width_to_set)
-            print("Width set to {}...".format(node_width.GetValue()))
-        else:
-            print("Width not available...")
+        # # apply maximum width
+        # node_width = PySpin.CIntegerPtr(nodemap.GetNode("Width"))
+        # if PySpin.IsAvailable(node_width) and PySpin.IsWritable(node_width):
+        #     width_to_set = node_width.GetMax()
+        #     node_width.SetValue(width_to_set)
+        #     print("Width set to {}...".format(node_width.GetValue()))
+        # else:
+        #     print("Width not available...")
 
-        # apply maximum height
-        node_height = PySpin.CIntegerPtr(nodemap.GetNode("Height"))
-        if PySpin.IsAvailable(node_height) and PySpin.IsWritable(node_height):
-            height_to_set = node_height.GetMax()
-            node_height.SetValue(height_to_set)
-            print("Height set to {}...".format(node_height.GetValue()))
-        else:
-            print("Height not available...")
+        # # apply maximum height
+        # node_height = PySpin.CIntegerPtr(nodemap.GetNode("Height"))
+        # if PySpin.IsAvailable(node_height) and PySpin.IsWritable(node_height):
+        #     height_to_set = node_height.GetMax()
+        #     node_height.SetValue(height_to_set)
+        #     print("Height set to {}...".format(node_height.GetValue()))
+        # else:
+        #     print("Height not available...")
         
 
         # get frame rate and other parameters
@@ -155,21 +155,39 @@ class Grasshopper3Camera(Camera):
         # print("width: " + str(width) + ", height: " + str(height))
 
         # create a queue to store images while asynchronously written to disk
-        image_queue = queue.Queue()
+        # image_queue = queue.Queue()
+        # processor = PySpin.ImageProcessor()
+        # processor.SetColorProcessing(PySpin.SPINNAKER_COLOR_PROCESSING_ALGORITHM_HQ_LINEAR)
 
         # loop through images in video
         print("here")
         print(self.num_images)
-        for i in range(self.num_images):
-          frame = self.cam.GetNextImage()
+        i = 0
+        while True:
+          # retrieve next image
+          frame = self.cam.GetNextImage(1000)
+
+          # ensure image is complete
+          if frame.IsIncomplete():
+              print('Image incomplete with image status %d ... \n' % frame.GetImageStatus())
+              continue
+          else:
+              # print image information
+              width = frame.GetWidth()
+              height = frame.GetHeight()
+              print('Camera grabbed image %d, width = %d, height = %d' % (i, width, height))
+
+              # convert image to mono 8
+              # image = processor.Convert(frame, PySpin.PixelFormat_RGB8)
+
           # frame = frame.Convert(self.pixel_format)
           # print(frame.GetWidth())
           # node_pixel_format = PySpin.CEnumerationPtr
           # convert PySpin ImagePtr into numpy array
           # frame = frame.Convert(self.pixel_format, PySpin.HQ_LINEAR)
-          image = np.array(frame.GetData(), dtype="uint8").reshape(frame.GetHeight(), frame.GetWidth())
+          image = np.array(frame.GetData(), dtype="uint8").reshape(height, width)
           # image = np.array(frame.GetData(), dtype="uint8")
-          image_queue.put(image)
+          # image_queue.put(image)
 
           # update screen every 10 frames
           if i % 10 == 0:
@@ -180,6 +198,7 @@ class Grasshopper3Camera(Camera):
 
           # release frame from camera buffer
           frame.Release()
+          i = (i + 1) % 100
 
         # while self.cap.isOpened():
         #     ret, frame = self.cap.read()
