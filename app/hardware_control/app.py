@@ -1,9 +1,10 @@
 from flask import Flask, redirect, url_for, render_template, Response, request, session
 from flask_session import Session
-import cv2
+from time import sleep
 
 from prior_stage.proscan import PriorStage
 from camera import Grasshopper3Camera
+from task_helpers import Task, randomize_tasks
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -21,8 +22,8 @@ def stage_test():
 
     # initialize communication with Prior ProScan III
     # input the appropriate COM port
-    # p = PriorStage("COM4")
-    p = PriorStage("/dev/ttyACM0")
+    p = PriorStage("COM4")
+    # p = PriorStage("/dev/ttyACM0")
 
     # # testing: move to provided coordinates
     # # coordinate provided in JSON format
@@ -31,8 +32,14 @@ def stage_test():
     # p.move_to({'x': 100000, 'y': 100000})
 
     # visit each ROI coordinate
-    for x, y in session['roi_coords']:
-        p.move_to({'x': x, 'y': y})
+    tasks = randomize_tasks(session['tasks'])
+    print(tasks)
+    for i, task in enumerate(tasks[:10]):
+        p.move_to({'x': task.x, 'y': task.y})
+        print("moved to task #%d at (%d, %d)" % (i, task.x, task.y))
+        sleep(5)
+    # for task in session['tasks']:
+    #     p.move_to({'x': task.x, 'y': task.y})
 
     # close serial port communication
     p.close()
@@ -43,17 +50,28 @@ def admin_screen():
     if request.method == 'POST':
         # reads data from uploaded dapsi file
         f = request.files['file']
-        read_settings = False
+        read_state = "header"
+        tasks = []
         with open(f.filename, "r"):
-            for line in f: 
-                if b"SETTINGS" in line:
-                    read_settings = True
-                elif read_settings:
+            for line in f:
+                line = line.decode("utf-8") 
+                if "SETTINGS" in line:
+                    read_state = "settings"
+                elif "BODY" in line:
+                    read_state = "body"
+                elif read_state == "settings":
+                    # read in settings, saved in settings dict
+                    # keys: n_wsi
                     print(line)
+                elif read_state == "body":
+                    if 'start' in line or 'finish' in line:
+                        continue
+                    # task input format: string from dapsi file
+                    # contains task name, task ID, task order, slot, ROI_X, ROI_Y, ROI_W, ROI_H, Q_text
+                    tasks.append(Task(line))
 
         # data within GUI.m (myData) in MATLAB
-        session['roi_coords'] = None
-        print(session['roi_coords'])
+        session['tasks'] = tasks
 
         return render_template('admin_screen.html')
     else:
@@ -67,11 +85,11 @@ def camera():
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
     else:
         print("showing live image")
-        # cam = Grasshopper3Camera()
+        cam = Grasshopper3Camera()
         print("outside cam")
-        # cam.camera_preview()
-        return render_template('camera.html')
-        # return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        cam.camera_preview()
+        # return render_template('camera.html')
+        return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port='5000')

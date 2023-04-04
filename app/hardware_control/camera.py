@@ -22,8 +22,8 @@ from PIL import Image, ImageTk
 # eyepiece offset
 
 # constants
-IMAGE_HEIGHT = 240
-IMAGE_WIDTH = 320
+IMAGE_HEIGHT = 2448
+IMAGE_WIDTH = 2048
 EXPOSURE_TIME = 500 # in microseconds
 PIXEL_FORMAT = PySpin.PixelFormat_RGB8
 
@@ -55,13 +55,13 @@ class Grasshopper3Camera(Camera):
 
         # set continuous acquisition for video streaming
         self.cam.AcquisitionMode.SetValue(PySpin.AcquisitionMode_Continuous)
-        self.cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
-        self.cam.ExposureMode.SetValue(PySpin.ExposureMode_Timed)
-        self.cam.ExposureTime.SetValue(EXPOSURE_TIME)
+        # self.cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
+        # self.cam.ExposureMode.SetValue(PySpin.ExposureMode_Timed)
+        # self.cam.ExposureTime.SetValue(EXPOSURE_TIME)
         nodemap = self.cam.GetNodeMap()
         # frame_rate_auto_node = PySpin.CEnumerationPtr(nodemap.GetNode("AcquisitionFrameRateAuto"))
-        enable_rate_mode = PySpin.CBooleanPtr(nodemap.GetNode("AcquisitionFrameRateEnabled"))
-        enable_rate_mode.SetValue(False)
+        # enable_rate_mode = PySpin.CBooleanPtr(nodemap.GetNode("AcquisitionFrameRateEnabled"))
+        # enable_rate_mode.SetValue(False)
         # cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
         # cam.AcquisitionFrameRateEnable.SetValue(False)
 
@@ -115,7 +115,7 @@ class Grasshopper3Camera(Camera):
 
         # get frame rate and other parameters
         self.seconds = 10
-        self.frame_rate = 163 # need to pull this somehow
+        self.frame_rate = 75 # found on the spinnaker site for model: GS3-U3-51S5C-C in Blenman lab
         print(self.frame_rate)
         self.num_images = round(self.frame_rate * self.seconds) # calculation based on number of frames per second
         # print("frame rate: " + self.frame_rate)
@@ -178,23 +178,29 @@ class Grasshopper3Camera(Camera):
               print('Camera grabbed image %d, width = %d, height = %d' % (i, width, height))
 
               # convert image to mono 8
-              # image = processor.Convert(frame, PySpin.PixelFormat_RGB8)
+              # image = processor.Convert(frame, PySpin.PixelFormat_BayerBG8)
 
-          # frame = frame.Convert(self.pixel_format)
+          # frame = frame.Convert(PySpin.PixelFormat_BayerBG8)
           # print(frame.GetWidth())
           # node_pixel_format = PySpin.CEnumerationPtr
           # convert PySpin ImagePtr into numpy array
           # frame = frame.Convert(self.pixel_format, PySpin.HQ_LINEAR)
+          # image = frame.GetData()
           image = np.array(frame.GetData(), dtype="uint8").reshape(height, width)
+          # image = np.array(frame.GetData(), dtype="uint8")
           # image = np.array(frame.GetData(), dtype="uint8")
           # image_queue.put(image)
 
-          # update screen every 10 frames
-          if i % 10 == 0:
+          # update screen every x frames
+          if i % 6 == 0:
               I = ImageTk.PhotoImage(Image.fromarray(image))
               self.imglabel.configure(image=I)
               self.imglabel.image = I
               self.window.update()
+
+              # buffer = cv2.imencode('.jpg', image)
+              # image = buffer.tobytes()
+              # yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + image + b'\r\n')
 
           # release frame from camera buffer
           frame.Release()
@@ -207,9 +213,9 @@ class Grasshopper3Camera(Camera):
         #         print("failed to read frame")
         #         break
         #     else: 
-        #         ret, buffer = cv2.imencode('.jpg', frame)
-        #         frame = buffer.tobytes()
-        #         yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+                # ret, buffer = cv2.imencode('.jpg', frame)
+                # frame = buffer.tobytes()
+                # yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
     def take_image(self):
