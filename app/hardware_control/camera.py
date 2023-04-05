@@ -22,8 +22,10 @@ from PIL import Image, ImageTk
 # eyepiece offset
 
 # constants
-IMAGE_HEIGHT = 2448
-IMAGE_WIDTH = 2048
+IMAGE_HEIGHT = 240
+IMAGE_WIDTH = 320
+WIDTH_OFFSET = round((720 - IMAGE_WIDTH) / 2)
+HEIGHT_OFFSET = round((540 - IMAGE_HEIGHT) / 2)
 EXPOSURE_TIME = 500 # in microseconds
 PIXEL_FORMAT = PySpin.PixelFormat_RGB8
 
@@ -55,15 +57,15 @@ class Grasshopper3Camera(Camera):
 
         # set continuous acquisition for video streaming
         self.cam.AcquisitionMode.SetValue(PySpin.AcquisitionMode_Continuous)
-        # self.cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
-        # self.cam.ExposureMode.SetValue(PySpin.ExposureMode_Timed)
-        # self.cam.ExposureTime.SetValue(EXPOSURE_TIME)
+        self.cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
+        self.cam.ExposureMode.SetValue(PySpin.ExposureMode_Timed)
+        self.cam.ExposureTime.SetValue(EXPOSURE_TIME)
         nodemap = self.cam.GetNodeMap()
-        # frame_rate_auto_node = PySpin.CEnumerationPtr(nodemap.GetNode("AcquisitionFrameRateAuto"))
-        # enable_rate_mode = PySpin.CBooleanPtr(nodemap.GetNode("AcquisitionFrameRateEnabled"))
-        # enable_rate_mode.SetValue(False)
-        # cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
-        # cam.AcquisitionFrameRateEnable.SetValue(False)
+        frame_rate_auto_node = PySpin.CEnumerationPtr(nodemap.GetNode("AcquisitionFrameRateAuto"))
+        enable_rate_mode = PySpin.CBooleanPtr(nodemap.GetNode("AcquisitionFrameRateEnabled"))
+        # self.cam.OffsetX.SetValue(WIDTH_OFFSET)
+        # self.cam.OffsetY.SetValue(HEIGHT_OFFSET)
+        enable_rate_mode.SetValue(False)
 
         # image format control
         # apply pixel format
@@ -156,8 +158,8 @@ class Grasshopper3Camera(Camera):
 
         # create a queue to store images while asynchronously written to disk
         # image_queue = queue.Queue()
-        # processor = PySpin.ImageProcessor()
-        # processor.SetColorProcessing(PySpin.SPINNAKER_COLOR_PROCESSING_ALGORITHM_HQ_LINEAR)
+        processor = PySpin.ImageProcessor()
+        processor.SetColorProcessing(PySpin.SPINNAKER_COLOR_PROCESSING_ALGORITHM_HQ_LINEAR)
 
         # loop through images in video
         print("here")
@@ -165,7 +167,7 @@ class Grasshopper3Camera(Camera):
         i = 0
         while True:
           # retrieve next image
-          frame = self.cam.GetNextImage(1000)
+          frame = self.cam.GetNextImage()
 
           # ensure image is complete
           if frame.IsIncomplete():
@@ -184,9 +186,9 @@ class Grasshopper3Camera(Camera):
           # print(frame.GetWidth())
           # node_pixel_format = PySpin.CEnumerationPtr
           # convert PySpin ImagePtr into numpy array
-          # frame = frame.Convert(self.pixel_format, PySpin.HQ_LINEAR)
+          processed_frame = processor.Convert(frame, PySpin.PixelFormat_RGB8)
           # image = frame.GetData()
-          image = np.array(frame.GetData(), dtype="uint8").reshape(height, width)
+          image = np.array(processed_frame.GetData(), dtype="uint8").reshape(height, width, 3)
           # image = np.array(frame.GetData(), dtype="uint8")
           # image = np.array(frame.GetData(), dtype="uint8")
           # image_queue.put(image)

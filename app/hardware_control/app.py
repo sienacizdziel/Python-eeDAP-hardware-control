@@ -1,10 +1,12 @@
 from flask import Flask, redirect, url_for, render_template, Response, request, session
 from flask_session import Session
 from time import sleep
+import os
+from werkzeug.utils import secure_filename
 
 from prior_stage.proscan import PriorStage
 from camera import Grasshopper3Camera
-from task_helpers import Task, randomize_tasks
+from task_helpers import Task, randomize_tasks, visit_task
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -35,7 +37,7 @@ def stage_test():
     tasks = randomize_tasks(session['tasks'])
     print(tasks)
     for i, task in enumerate(tasks[:10]):
-        p.move_to({'x': task.x, 'y': task.y})
+        visit_task(p, task)
         print("moved to task #%d at (%d, %d)" % (i, task.x, task.y))
         sleep(5)
     # for task in session['tasks']:
@@ -50,6 +52,12 @@ def admin_screen():
     if request.method == 'POST':
         # reads data from uploaded dapsi file
         f = request.files['file']
+        if f.filename:
+            f.save(secure_filename(f.filename))
+            print('The file was uploaded successfully')
+        else:
+            'No file was uploaded'
+            return render_template('admin_screen.html')
         read_state = "header"
         tasks = []
         with open(f.filename, "r"):
@@ -70,6 +78,9 @@ def admin_screen():
                     # contains task name, task ID, task order, slot, ROI_X, ROI_Y, ROI_W, ROI_H, Q_text
                     tasks.append(Task(line))
 
+        # os.remove(f.filename)
+        # print([])
+        print('removed' + f.filename)
         # data within GUI.m (myData) in MATLAB
         session['tasks'] = tasks
 
@@ -87,7 +98,7 @@ def camera():
         print("showing live image")
         cam = Grasshopper3Camera()
         print("outside cam")
-        cam.camera_preview()
+        # cam.camera_preview()
         # return render_template('camera.html')
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
