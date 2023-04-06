@@ -5,6 +5,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import tkinter as tk
 from PIL import Image, ImageTk
+from io import BytesIO
 
 # PySpin is a python wrapper for the Spinnaker library
 # Spinnaker SDK is FLIR's next generation GenlCam3 API library for cameras
@@ -195,7 +196,12 @@ class Grasshopper3Camera(Camera):
 
           # update screen every x frames
           if i % 6 == 0:
-              I = ImageTk.PhotoImage(Image.fromarray(image))
+              # rgb_image = Image.fromarray(image)
+              # buf = BytesIO()
+              # rgb_image.save(buf, 'JPEG')
+              # frame = buf.getbuffer()
+              # yield(b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+              I = ImageTk.PhotoImage((Image.fromarray(image)).resize((width // 2, height // 2)))
               self.imglabel.configure(image=I)
               self.imglabel.image = I
               self.window.update()

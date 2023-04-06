@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 
 from prior_stage.proscan import PriorStage
 from camera import Grasshopper3Camera
-from task_helpers import Task, randomize_tasks, visit_task
+from task_helpers import Task, randomize_tasks, visit_task, get_all_slide_numbers
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -35,9 +35,14 @@ def stage_test():
 
     # visit each ROI coordinate
     tasks = randomize_tasks(session['tasks'])
+    # explain offset process
+    slides = get_all_slide_numbers(tasks)
+    print(slides)
     print(tasks)
     for i, task in enumerate(tasks[:10]):
-        visit_task(p, task)
+        visit_task(p, task, slides.index(task._get_slide_number()) * 200)
+        print(slides.index(task._get_slide_number()))
+        print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
         print("moved to task #%d at (%d, %d)" % (i, task.x, task.y))
         sleep(5)
     # for task in session['tasks']:
@@ -56,13 +61,14 @@ def admin_screen():
             f.save(secure_filename(f.filename))
             print('The file was uploaded successfully')
         else:
-            'No file was uploaded'
+            print('No file was uploaded')
             return render_template('admin_screen.html')
         read_state = "header"
         tasks = []
-        with open(f.filename, "r"):
-            for line in f:
-                line = line.decode("utf-8") 
+        with open(f.filename, "r") as tmp:
+            print("here")
+            for line in tmp:
+                print(line)
                 if "SETTINGS" in line:
                     read_state = "settings"
                 elif "BODY" in line:
@@ -76,15 +82,12 @@ def admin_screen():
                         continue
                     # task input format: string from dapsi file
                     # contains task name, task ID, task order, slot, ROI_X, ROI_Y, ROI_W, ROI_H, Q_text
+                    print(line)
                     tasks.append(Task(line))
 
-        # os.remove(f.filename)
-        # print([])
-        print('removed' + f.filename)
-        # data within GUI.m (myData) in MATLAB
+        os.remove(f.filename)
         session['tasks'] = tasks
-
-        return render_template('admin_screen.html')
+        return render_template('admin_screen.html', uploaded=True, file=f.filename)
     else:
         return render_template('admin_screen.html')
 
@@ -98,7 +101,7 @@ def camera():
         print("showing live image")
         cam = Grasshopper3Camera()
         print("outside cam")
-        # cam.camera_preview()
+        cam.camera_preview()
         # return render_template('camera.html')
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
