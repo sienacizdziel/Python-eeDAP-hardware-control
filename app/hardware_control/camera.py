@@ -129,8 +129,6 @@ class Grasshopper3Camera(Camera):
         width = str(IMAGE_WIDTH + 25) # why 25?
         height = str(IMAGE_HEIGHT + 35)
         self.window.geometry(width + 'x' + height)
-        textlbl = tk.Label(self.window, text="elapsed time: ")
-        textlbl.grid(column=0, row=0)
         self.imglabel = tk.Label(self.window)
         self.imglabel.place(x=10, y=20)
         self.window.update()

@@ -21,7 +21,8 @@ class Task:
             parsed_id = self.id.split('_')
             return parsed_id[0].split('-')[::-1][0]
         except:
-            print('could not parse slide ID')
+            print('Could not parse slide ID: ' + self.id + '. Continuing with successfully parsed IDs.')
+            return None
             
 
 def randomize_tasks(tasks):
@@ -39,6 +40,8 @@ def get_all_slide_numbers(tasks):
     try:
       for task in tasks:
           full_num = task._get_slide_number()
+          if not full_num:
+              continue
           print(full_num)
           num = full_num[:len(full_num) - 1]
           print(num)

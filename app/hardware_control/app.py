@@ -61,8 +61,8 @@ def admin_screen():
             f.save(secure_filename(f.filename))
             print('The file was uploaded successfully')
         else:
-            print('No file was uploaded')
-            return render_template('admin_screen.html')
+            print('No file was uploaded.')
+            return render_template('admin_screen.html', error_message="No file uploaded.")
         read_state = "header"
         tasks = []
         with open(f.filename, "r") as tmp:
@@ -89,7 +89,7 @@ def admin_screen():
         session['tasks'] = tasks
         return render_template('admin_screen.html', uploaded=True, file=f.filename)
     else:
-        return render_template('admin_screen.html')
+        return render_template('admin_screen.html', uploaded=False)
 
 @app.route('/camera', methods=['GET', 'POST'])
 # route for testing the camera
