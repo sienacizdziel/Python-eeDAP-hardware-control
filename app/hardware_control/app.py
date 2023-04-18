@@ -17,40 +17,75 @@ Session(app)
 def index():
     return render_template('index.html')
 
-@app.route('/stage_test')
+@app.route('/stage_test', methods=['GET', 'POST'])
 def stage_test():
+    if request.method == 'POST':
+      index = session['current_task_num']
+      task = session['current_tasks'][index]
+      slides = session['slide_nums']
+      p = PriorStage("COM4")
+      visit_task(p, task, slides.index(task._get_slide_number()) * 200)
+      print(slides.index(task._get_slide_number()))
+      print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
+      print("moved to task #%d at (%d, %d)" % (index, task.x, task.y))
+      session['current_task_num'] += 1
+      # print(slides)
+      # print(tasks)
+      # for i, task in enumerate(tasks[:10]):
+      #     visit_task(p, task, slides.index(task._get_slide_number()) * 200)
+      #     print(slides.index(task._get_slide_number()))
+      #     print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
+      #     print("moved to task #%d at (%d, %d)" % (i, task.x, task.y))
+      #     sleep(5)
+      # for task in session['tasks']:
+      #     p.move_to({'x': task.x, 'y': task.y})
 
-    print("running move stage tester")
+      # close serial port communication
+      p.close()
+      return render_template('stage_test.html', number=session['current_task_num']-1, x=task.x, y=task.y)
+        
+    else:
 
-    # initialize communication with Prior ProScan III
-    # input the appropriate COM port
-    p = PriorStage("COM4")
-    # p = PriorStage("/dev/ttyACM0")
+      print("running move stage tester")
 
-    # # testing: move to provided coordinates
-    # # coordinate provided in JSON format
-    # # if the stage is already at those coordinates, it will not move
-    # p.move_to({'x': -100000, 'y': -100000})
-    # p.move_to({'x': 100000, 'y': 100000})
+      # initialize communication with Prior ProScan III
+      # input the appropriate COM port
+      p = PriorStage("COM4")
+      # p = PriorStage("/dev/ttyACM0")
 
-    # visit each ROI coordinate
-    tasks = randomize_tasks(session['tasks'])
-    # explain offset process
-    slides = get_all_slide_numbers(tasks)
-    print(slides)
-    print(tasks)
-    for i, task in enumerate(tasks[:10]):
-        visit_task(p, task, slides.index(task._get_slide_number()) * 200)
-        print(slides.index(task._get_slide_number()))
-        print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
-        print("moved to task #%d at (%d, %d)" % (i, task.x, task.y))
-        sleep(5)
-    # for task in session['tasks']:
-    #     p.move_to({'x': task.x, 'y': task.y})
+      # # testing: move to provided coordinates
+      # # coordinate provided in JSON format
+      # # if the stage is already at those coordinates, it will not move
+      # p.move_to({'x': -100000, 'y': -100000})
+      # p.move_to({'x': 100000, 'y': 100000})
 
-    # close serial port communication
-    p.close()
-    return render_template('running_test_page.html')
+      # visit each ROI coordinate
+      tasks = randomize_tasks(session['tasks'])
+      # explain offset process
+      slides = get_all_slide_numbers(tasks)
+      session['current_tasks'] = tasks
+      session['current_task_num'] = 0
+      session['slide_nums'] = slides
+      task = session['current_tasks'][session['current_task_num']]
+      visit_task(p, task, slides.index(task._get_slide_number()) * 200)
+      print(slides.index(task._get_slide_number()))
+      print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
+      print("moved to task #%d at (%d, %d)" % (session['current_task_num'], task.x, task.y))
+      session['current_task_num'] += 1
+      # print(slides)
+      # print(tasks)
+      # for i, task in enumerate(tasks[:10]):
+      #     visit_task(p, task, slides.index(task._get_slide_number()) * 200)
+      #     print(slides.index(task._get_slide_number()))
+      #     print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
+      #     print("moved to task #%d at (%d, %d)" % (i, task.x, task.y))
+      #     sleep(5)
+      # for task in session['tasks']:
+      #     p.move_to({'x': task.x, 'y': task.y})
+
+      # close serial port communication
+      p.close()
+      return render_template('stage_test.html', number=session['current_task_num']-1, x=task.x, y=task.y)
 
 @app.route('/admin_screen', methods=['GET', 'POST'])
 def admin_screen():
