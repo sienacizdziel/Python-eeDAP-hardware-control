@@ -1,4 +1,4 @@
-# Integrate_Microscope_eeDAP
+# Python eeDAP Hardware Control
 
 ## Folder Structure
 
@@ -11,6 +11,8 @@ Folder structure is as follows:
 ├── hardware_control/
 
 │   ├── grasshopper_cam_usb/
+
+│   │    ├── camera.py
 
 │   ├── miscellaneous_rough_drafts/
 

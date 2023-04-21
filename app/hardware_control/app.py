@@ -1,13 +1,18 @@
-from flask import Flask, redirect, url_for, render_template, Response, request, session
-from flask_session import Session
-from time import sleep
 import os
+from flask import Flask, render_template, Response, request, session
+from flask_session import Session
 from werkzeug.utils import secure_filename
-
 from prior_stage.proscan import PriorStage
-from camera import Grasshopper3Camera
+from grasshopper_cam_usb.camera import Grasshopper3Camera
 from task_helpers import Task, randomize_tasks, visit_task, get_all_slide_numbers
 
+""" 
+Initialize Flask session for saving data between routes. 
+Session contains: 
+- tasks: a list of randomized Task objects, read from the dapsi file
+- current_task_num: the index of the current task being read, initialized to 0 and incremented as tasks are visited via the stage
+- slides: a list of possible slide numbers within the dapsi file (for example: ['81B', '82B', '83B'])
+"""
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -21,8 +26,8 @@ def index():
 def stage_test():
     if request.method == 'POST':
       index = session['current_task_num']
-      task = session['current_tasks'][index]
-      slides = session['slide_nums']
+      task = session['tasks'][index]
+      slides = session['slides']
       p = PriorStage("COM4")
       visit_task(p, task, slides.index(task._get_slide_number()) * 200)
       print(slides.index(task._get_slide_number()))
@@ -63,10 +68,10 @@ def stage_test():
       tasks = randomize_tasks(session['tasks'])
       # explain offset process
       slides = get_all_slide_numbers(tasks)
-      session['current_tasks'] = tasks
+      session['tasks'] = tasks
       session['current_task_num'] = 0
-      session['slide_nums'] = slides
-      task = session['current_tasks'][session['current_task_num']]
+      session['slides'] = slides
+      task = session['tasks'][session['current_task_num']]
       visit_task(p, task, slides.index(task._get_slide_number()) * 200)
       print(slides.index(task._get_slide_number()))
       print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
@@ -88,30 +93,35 @@ def stage_test():
       return render_template('stage_test.html', number=session['current_task_num']-1, x=task.x, y=task.y)
 
 @app.route('/admin_screen', methods=['GET', 'POST'])
+# landing page for uploading dapsi files
 def admin_screen():
     if request.method == 'POST':
-        # reads data from uploaded dapsi file
+        # read data from uploaded dapsi file
         f = request.files['file']
         if f.filename:
+            # if file was uploaded successfully, temporarily save  file for reading
             f.save(secure_filename(f.filename))
             print('The file was uploaded successfully')
         else:
+            # if file was not uploaded successfully, return an error message for the user to try again
             print('No file was uploaded.')
             return render_template('admin_screen.html', error_message="No file uploaded.")
+        
         read_state = "header"
         tasks = []
+        # read temporarily saved file line by line
+        # reads as a state machine with states: "header", "settings", "body"
+        # save tasks into task list
         with open(f.filename, "r") as tmp:
-            print("here")
             for line in tmp:
-                print(line)
+                # currently skips over all settings
+                # future TODO: save settings into session
                 if "SETTINGS" in line:
                     read_state = "settings"
                 elif "BODY" in line:
                     read_state = "body"
                 elif read_state == "settings":
-                    # read in settings, saved in settings dict
-                    # keys: n_wsi
-                    print(line)
+                    print(line) # can save into settings dictionary to put into session
                 elif read_state == "body":
                     if 'start' in line or 'finish' in line:
                         continue
@@ -119,7 +129,6 @@ def admin_screen():
                     # contains task name, task ID, task order, slot, ROI_X, ROI_Y, ROI_W, ROI_H, Q_text
                     print(line)
                     tasks.append(Task(line))
-
         os.remove(f.filename)
         session['tasks'] = tasks
         return render_template('admin_screen.html', uploaded=True, file=f.filename)
@@ -135,8 +144,8 @@ def camera():
     else:
         print("showing live image")
         cam = Grasshopper3Camera()
-        print("outside cam")
-        cam.camera_preview()
+        # print("outside cam")
+        # cam.camera_preview()
         # return render_template('camera.html')
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
