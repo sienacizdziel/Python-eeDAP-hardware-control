@@ -6,6 +6,7 @@ from prior_stage.proscan import PriorStage
 from grasshopper_cam_usb.camera import Grasshopper3Camera
 from task_helpers import Task, randomize_tasks, visit_task, get_all_slide_numbers
 
+
 """ 
 Initialize Flask session for saving data between routes. 
 Session contains: 
@@ -18,90 +19,97 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+
+""" homepage """
 @app.route('/')
 def index():
     return render_template('index.html')
 
+
+""" page for visiting ROI coordinates via stage movement """
 @app.route('/stage_test', methods=['GET', 'POST'])
 def stage_test():
+    OFFSET_CONSTANT = 200 # pixel size of each additional slide, as offset
+
+    # on each POST request, visit a new task
     if request.method == 'POST':
+      
+      # access saved variables in session
       index = session['current_task_num']
-      task = session['tasks'][index]
+      try:
+        task = session['tasks'][index]
+      except:
+          # all tasks completed
+          return render_template('running_test_page.html')
       slides = session['slides']
+
+      # initialize stage class
       p = PriorStage("COM4")
-      visit_task(p, task, slides.index(task._get_slide_number()) * 200)
-      print(slides.index(task._get_slide_number()))
+
+      # visit desired task
+      offset = slides.index(task._get_slide_number()) * OFFSET_CONSTANT # takes the index of the slide the task is on and multiplies by  offset constant
+      visit_task(p, task, offset)
+      
+      # output values
       print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
       print("moved to task #%d at (%d, %d)" % (index, task.x, task.y))
+
+      # update session task number for next task
       session['current_task_num'] += 1
-      # print(slides)
-      # print(tasks)
-      # for i, task in enumerate(tasks[:10]):
-      #     visit_task(p, task, slides.index(task._get_slide_number()) * 200)
-      #     print(slides.index(task._get_slide_number()))
-      #     print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
-      #     print("moved to task #%d at (%d, %d)" % (i, task.x, task.y))
-      #     sleep(5)
-      # for task in session['tasks']:
-      #     p.move_to({'x': task.x, 'y': task.y})
 
       # close serial port communication
       p.close()
+
+      # render test page with task info
       return render_template('stage_test.html', number=session['current_task_num']-1, x=task.x, y=task.y)
         
     else:
-
       print("running move stage tester")
 
       # initialize communication with Prior ProScan III
       # input the appropriate COM port
       p = PriorStage("COM4")
-      # p = PriorStage("/dev/ttyACM0")
 
-      # # testing: move to provided coordinates
-      # # coordinate provided in JSON format
-      # # if the stage is already at those coordinates, it will not move
-      # p.move_to({'x': -100000, 'y': -100000})
-      # p.move_to({'x': 100000, 'y': 100000})
-
-      # visit each ROI coordinate
+      # randomize ROI coordinates
       tasks = randomize_tasks(session['tasks'])
-      # explain offset process
-      slides = get_all_slide_numbers(tasks)
+      slides = get_all_slide_numbers(tasks) # get all possible slide numbers in dapsi file
+
+      # initialize session variables
       session['tasks'] = tasks
       session['current_task_num'] = 0
       session['slides'] = slides
       task = session['tasks'][session['current_task_num']]
+
+      # visit the first task
+      offset = slides.index(task._get_slide_number()) * OFFSET_CONSTANT
       visit_task(p, task, slides.index(task._get_slide_number()) * 200)
-      print(slides.index(task._get_slide_number()))
+
+      # output values
       print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
       print("moved to task #%d at (%d, %d)" % (session['current_task_num'], task.x, task.y))
+      
+      # update session task number for next task
       session['current_task_num'] += 1
-      # print(slides)
-      # print(tasks)
-      # for i, task in enumerate(tasks[:10]):
-      #     visit_task(p, task, slides.index(task._get_slide_number()) * 200)
-      #     print(slides.index(task._get_slide_number()))
-      #     print(str(task._get_slide_number()) + " offset = " + str(slides.index(task._get_slide_number()) * 200))
-      #     print("moved to task #%d at (%d, %d)" % (i, task.x, task.y))
-      #     sleep(5)
-      # for task in session['tasks']:
-      #     p.move_to({'x': task.x, 'y': task.y})
 
       # close serial port communication
       p.close()
+
+      # render test page with task info
       return render_template('stage_test.html', number=session['current_task_num']-1, x=task.x, y=task.y)
 
+
+""" landing page for uploading dapsi files """
 @app.route('/admin_screen', methods=['GET', 'POST'])
-# landing page for uploading dapsi files
 def admin_screen():
+    # read data from uploaded dapsi file
     if request.method == 'POST':
-        # read data from uploaded dapsi file
         f = request.files['file']
+
         if f.filename:
-            # if file was uploaded successfully, temporarily save  file for reading
+            # if file was uploaded successfully, temporarily save file for reading
             f.save(secure_filename(f.filename))
             print('The file was uploaded successfully')
+
         else:
             # if file was not uploaded successfully, return an error message for the user to try again
             print('No file was uploaded.')
