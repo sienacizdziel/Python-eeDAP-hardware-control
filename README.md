@@ -1,35 +1,20 @@
 # Python eeDAP Hardware Control
 
 ## Folder Structure
-
 Folder structure is as follows:
-
 .
-
 ├── CoreLogs/
-
 ├── hardware_control/
-
 │   ├── grasshopper_cam_usb/
-
 │   │    ├── camera.py
-
 │   ├── miscellaneous_rough_drafts/
-
 │   ├── prior_stage/
-
 │   │    ├── proscan.py
-
 │   ├── base_stage.py
-
 │   ├── check_ports.py
-
 │   ├── move_stage_tester.py
-
 │   └── requirements.txt
-
 ├── micromanager_files/
-
 └── README.md
 
 The micromanager_files/ and CoreLogs/ are remnants of configuration files, Pycro-Manager scripts, and log files from attempts to use µManager for the microscope hardware control before transitioning to a Python script from scratch, based on source code from the Python-Microscope and the OpenFlexure server microscope hardware control.

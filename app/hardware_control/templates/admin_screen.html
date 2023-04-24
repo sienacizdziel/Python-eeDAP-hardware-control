@@ -1,20 +1,21 @@
+<!-- displays error message if it exists -->
 {% if error_message %}
   <p>{{ error_message }}</p>
 {% endif %}
 
+<!-- if a file has been uploaded, enable the "run stage" or "upload new file" buttons -->
 {% if uploaded %}
   <p>uploaded {{ file }}</p>
   <a href="/stage_test"><button>run stage</button></a>
-  <br \>
-  <br \>
+  <br style="line-height: 5px;"></br>
   <a href="/admin_screen"><button>upload new file</button></a>
+
+<!-- else, display form for uploading a dapsi file from computer -->
 {% else %}
-  <!-- form for reading a dapsi file from computer -->
   <form action="/admin_screen" method="POST" enctype="multipart/form-data">
     <label for="myfile">Click to browse for .dapsi input file:</label>
     <input type="file" id="file" name="file" />
-    <br />
-    <br />
+    <br style="line-height: 5px;"></br>
     <input type="submit" value="Upload" />
   </form>
 {% endif %}

@@ -1,12 +1,16 @@
+<!-- template displayed after movement to each ROI coordinate -->
 <html>
-<body>
+  <body>
+    <!-- uses jinja to access ROI coordinate info -->
     <p>Moved to ROI coordinate {{ number }}: ({{x }}, {{ y }})</p>
+
+    <!-- sends a post request to continue to next ROI -->
     <form action="/stage_test" method="POST" enctype="multipart/form-data">
       <input type="submit" value="Continue to next ROI" />
     </form>
+    
     <a href="/camera"><button>View camera</button></a>
-    <br />
-    <br />
+    <br style="line-height: 5px;"></br>
     <a href="/"><button>Cancel</button></a>
-</body>
+  </body>
 </html>

@@ -7,6 +7,10 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from io import BytesIO
 
+""" 
+PySpin is a Python wrapper for the Spinnaker library. Spinnaker SDK is FLIR's GENICam3
+"""
+
 # PySpin is a python wrapper for the Spinnaker library
 # Spinnaker SDK is FLIR's next generation GenlCam3 API library for cameras
 # supports FLIR pointgrey cameras

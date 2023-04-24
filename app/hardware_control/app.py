@@ -115,46 +115,58 @@ def admin_screen():
             print('No file was uploaded.')
             return render_template('admin_screen.html', error_message="No file uploaded.")
         
+        """ 
+        reads through file as a state machine with states: 
+            "header"
+            "settings"
+            "body" 
+        """
         read_state = "header"
         tasks = []
-        # read temporarily saved file line by line
-        # reads as a state machine with states: "header", "settings", "body"
-        # save tasks into task list
         with open(f.filename, "r") as tmp:
+
+            # read temporarily saved file line by line
             for line in tmp:
+
                 # currently skips over all settings
-                # future TODO: save settings into session
+                # future TODO: save settings into session for use
                 if "SETTINGS" in line:
                     read_state = "settings"
+
                 elif "BODY" in line:
                     read_state = "body"
+
                 elif read_state == "settings":
-                    print(line) # can save into settings dictionary to put into session
+                    print(line) # can save into settings dictionary here to put into session
+
                 elif read_state == "body":
                     if 'start' in line or 'finish' in line:
                         continue
-                    # task input format: string from dapsi file
-                    # contains task name, task ID, task order, slot, ROI_X, ROI_Y, ROI_W, ROI_H, Q_text
-                    print(line)
+
+                    # save tasks into task list
                     tasks.append(Task(line))
-        os.remove(f.filename)
-        session['tasks'] = tasks
+
+        os.remove(f.filename) # remove temporary file
+        session['tasks'] = tasks # save tasks into session
         return render_template('admin_screen.html', uploaded=True, file=f.filename)
     else:
+        # renders upload screen for dapsi file
         return render_template('admin_screen.html', uploaded=False)
 
+""" route for testing the camera """
 @app.route('/camera', methods=['GET', 'POST'])
-# route for testing the camera
 def camera():
+    """ 
+    Note: At the moment, the camera display route is not fully functional. Because the code uses a tkinter window, 
+    """
     if request.method == 'POST':
-        cam.take_image()
+        # cam.take_image() (TODO: does not successfully take photo via tkinter)
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
     else:
         print("showing live image")
         cam = Grasshopper3Camera()
-        # print("outside cam")
-        # cam.camera_preview()
-        # return render_template('camera.html')
+        # note that at the moment this route does not work properly
+        # because the camera disp
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
