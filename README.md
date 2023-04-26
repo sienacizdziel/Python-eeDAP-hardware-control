@@ -8,7 +8,7 @@ Folder structure is as follows:
 
 ├── hardware_control/
 
-│     ├── grasshopper_cam_usb/
+│        ├── grasshopper_cam_usb/
 
 │     │     ├── camera.py
 
