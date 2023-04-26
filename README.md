@@ -8,7 +8,7 @@ Folder structure is as follows:
 
 ├── hardware_control/
 
-│        ├── grasshopper_cam_usb/
+│     ├── grasshopper_cam_usb/
 
 │     │     ├── camera.py
 
@@ -16,7 +16,7 @@ Folder structure is as follows:
 
 │     │     ├── proscan.py
 
-│     ├── templates
+│     ├── templates/
 
 │     │     ├── admin_screen.html
 
@@ -27,6 +27,8 @@ Folder structure is as follows:
 │     │     ├── running_test_page.html
 
 │     │     ├── stage_test.html
+
+│     │     ├── error.html
 
 │     ├── base_stage.py
 
