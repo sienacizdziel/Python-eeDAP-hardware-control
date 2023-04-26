@@ -8,39 +8,39 @@ Folder structure is as follows:
 
 ├── hardware_control/
 
-│   ├── grasshopper_cam_usb/
+│     ├── grasshopper_cam_usb/
 
-│   │    ├── camera.py
+│     │     ├── camera.py
 
-│   ├── prior_stage/
+│     ├── prior_stage/
 
-│   │    ├── proscan.py
+│     │     ├── proscan.py
 
-│   ├── templates
+│     ├── templates
 
-│   │    ├── admin_screen.html
+│     │     ├── admin_screen.html
 
-│   │    ├── camera.html
+│     │     ├── camera.html
 
-│   │    ├── index.html
+│     │     ├── index.html
 
-│   │    ├── running_test_page.html
+│     │     ├── running_test_page.html
 
-│   │    ├── stage_test.html
+│     │     ├── stage_test.html
 
-│   ├── base_stage.py
+│     ├── base_stage.py
 
-│   ├── check_ports.py
+│     ├── check_ports.py
 
-│   ├── app.py
+│     ├── app.py
 
-│   ├── task_helpers.py
+│     ├── task_helpers.py
 
-│   ├── move_stage_tester.py
+│     ├── move_stage_tester.py
 
-│   ├── .gitignore
+│     ├── .gitignore
 
-│   └── requirements.txt
+│     └── requirements.txt
 
 ├── micromanager_files/
 
@@ -87,13 +87,13 @@ Under the folder `hardware_control/`:
 
 - `task_helpers.py`: contains the Task class for reading tasks from the uploaded .dapsi file. Includes additional helper functions for ROI randomization and stage movement 
 
-## Frameworks:
+## Frameworks
 This program is a Flask application calling Python scripts written to access the microscope hardware. The Flask application renders templates created in HTML (currently with minimal CSS) along with Jinja for custom templating. 
 
-## Versions:
+## Versions
 - Python 3.8
 
-## Usage:
+## Usage
 The code editor I would suggest to use is Visual Studio Code. If you would like to install VSCode, visit [this site](https://code.visualstudio.com/). 
 
 The code for hardware control is located in this GitHub repository. This repository was forked off of [vstevensf’s Python-eeDAP-hardware-control repository](https://github.com/vstevensf/Python-eeDAP-hardware-control). 
