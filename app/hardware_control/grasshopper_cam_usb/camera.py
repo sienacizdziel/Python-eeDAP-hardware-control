@@ -1,4 +1,3 @@
-''' dependencies ''' 
 import cv2, queue
 import PySpin
 import numpy as np
@@ -6,6 +5,7 @@ from matplotlib import pyplot as plt
 import tkinter as tk
 from PIL import Image, ImageTk
 from io import BytesIO
+from abc import ABCMeta, abstractmethod
 
 """ 
 PySpin is a Python wrapper for the Spinnaker library. Spinnaker SDK is FLIR's GENICam3
@@ -34,15 +34,20 @@ HEIGHT_OFFSET = round((540 - IMAGE_HEIGHT) / 2)
 EXPOSURE_TIME = 500 # in microseconds
 PIXEL_FORMAT = PySpin.PixelFormat_RGB8
 
-# cv2.videoCapture(PATH / ID)
-# cap.read() for individually accessing frames
-# read from .dapsi file for camera type
-class Camera():
+class Camera(metaclass=ABCMeta):
+    """ parent class for cameras"""
+
     def __init__(self):
         pass
 
+    @abstractmethod
+    def camera_preview(self):
+        """ show camera preview """
+        raise NotImplementedError()
+
 class Grasshopper3Camera(Camera):
     def __init__(self, device=0):
+        super().__init__()
         """ initialize video capture with device number """
         # discover camera
         system = PySpin.System.GetInstance()
@@ -216,17 +221,6 @@ class Grasshopper3Camera(Camera):
           frame.Release()
           i = (i + 1) % 100
 
-        # while self.cap.isOpened():
-        #     ret, frame = self.cap.read()
-        #     print(ret, frame)
-        #     if not ret:
-        #         print("failed to read frame")
-        #         break
-        #     else: 
-                # ret, buffer = cv2.imencode('.jpg', frame)
-                # frame = buffer.tobytes()
-                # yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
 
     def take_image(self):
         """ capture an image frame from video """
@@ -236,4 +230,4 @@ class Grasshopper3Camera(Camera):
     def destroy(self):
         """ destroys all instances of camera, in order to safely end a video """
         pass
-
+    
