@@ -65,6 +65,10 @@ def stage_test():
         
     else:
       print("running move stage tester")
+      
+      # check that tasks have been saved
+      if not session['tasks']:
+          return render_template('error.html', error='Could not find tasks. Return to landing page to upload file.')
 
       # initialize communication with Prior ProScan III
       # input the appropriate COM port

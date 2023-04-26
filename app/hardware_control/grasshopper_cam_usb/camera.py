@@ -8,16 +8,11 @@ from io import BytesIO
 from abc import ABCMeta, abstractmethod
 
 """ 
-PySpin is a Python wrapper for the Spinnaker library. Spinnaker SDK is FLIR's GENICam3
+Creates an abstract base parent class for cameras & implements the camera 
+class for the Grasshopper3 camera using PySpin (a Python wrapper for the 
+FLIR Spinnaker SDK API library, which supports FLIR Point Grey cameras)
 """
 
-# PySpin is a python wrapper for the Spinnaker library
-# Spinnaker SDK is FLIR's next generation GenlCam3 API library for cameras
-# supports FLIR pointgrey cameras
-
-''' tutorials '''
-# opencv & usb tutorial (not used): https://www.youtube.com/watch?v=FygLqV15TxQ 
-# flask & opencv video tutorial: https://towardsdatascience.com/video-streaming-in-web-browsers-with-opencv-flask-93a38846fe00 
 # ptgrey camera with PySpin tutorial: https://github.com/nimble00/PTGREY-cameras-with-python 
 
 ''' additional considerations '''
@@ -46,36 +41,40 @@ class Camera(metaclass=ABCMeta):
         raise NotImplementedError()
 
 class Grasshopper3Camera(Camera):
+    """ camera class for the Grasshopper3 FLIR camera """
     def __init__(self, device=0):
         super().__init__()
-        """ initialize video capture with device number """
+
+        """ initialize video capture with device number, which defaults to 0 """
         # discover camera
         system = PySpin.System.GetInstance()
         cam_list = system.GetCameras()
         self.cam = cam_list.GetByIndex(device)
-        # print(self.cam)
+
+        # to view the first 10 cameras accessible via the system, uncomment the code below
+        # print(cam_list)
         # for i in range(10):
         #     print(cam_list.GetByIndex(i))
-        # print(cam_list)
 
         # initialize camera parameters
         self.cam.Init()
         self.cam.UserSetSelector.SetValue(PySpin.UserSetSelector_Default)
         self.cam.UserSetLoad()
 
-        print(self.cam)
-
-        # set continuous acquisition for video streaming
+        # set continuous acquisition and exposure values for continuous streaming
         self.cam.AcquisitionMode.SetValue(PySpin.AcquisitionMode_Continuous)
         self.cam.ExposureAuto.SetValue(PySpin.ExposureAuto_Off)
         self.cam.ExposureMode.SetValue(PySpin.ExposureMode_Timed)
         self.cam.ExposureTime.SetValue(EXPOSURE_TIME)
+
+        
         nodemap = self.cam.GetNodeMap()
-        frame_rate_auto_node = PySpin.CEnumerationPtr(nodemap.GetNode("AcquisitionFrameRateAuto"))
         enable_rate_mode = PySpin.CBooleanPtr(nodemap.GetNode("AcquisitionFrameRateEnabled"))
+        enable_rate_mode.SetValue(False)
+
+        # potential options for offsetting x and y coordinates
         # self.cam.OffsetX.SetValue(WIDTH_OFFSET)
         # self.cam.OffsetY.SetValue(HEIGHT_OFFSET)
-        enable_rate_mode.SetValue(False)
 
         # image format control
         # apply pixel format
@@ -89,63 +88,24 @@ class Grasshopper3Camera(Camera):
         #         print("Pixel format set to {}".format(node_pixel_format.GetCurrentEntry().GetSymbolic()))
         #     else:
         #         print("Pixel format not available...")
-
-        # # apply minimum to offset X
-        # node_offset_x = PySpin.CIntegerPtr(nodemap.GetNode("OffsetX"))
-        # if PySpin.IsAvailable(node_offset_x) and PySpin.IsWritable(node_offset_x):
-        #     node_offset_x.SetValue(node_offset_x.GetMin())
-        #     print("Offset X set to {}".format(node_offset_x.GetMin()))
-        # else:
-        #     print("Offset X not available...")
-
-        # # apply minimum to offset Y
-        # node_offset_y = PySpin.CIntegerPtr(nodemap.GetNode("OffsetY"))
-        # if PySpin.IsAvailable(node_offset_y) and PySpin.IsWritable(node_offset_y):
-        #     node_offset_y.SetValue(node_offset_y.GetMin())
-        #     print("Offset Y set to {}".format(node_offset_y.GetMin()))
-        # else:
-        #     print("Offset Y not available...")
-
-        # # apply maximum width
-        # node_width = PySpin.CIntegerPtr(nodemap.GetNode("Width"))
-        # if PySpin.IsAvailable(node_width) and PySpin.IsWritable(node_width):
-        #     width_to_set = node_width.GetMax()
-        #     node_width.SetValue(width_to_set)
-        #     print("Width set to {}...".format(node_width.GetValue()))
-        # else:
-        #     print("Width not available...")
-
-        # # apply maximum height
-        # node_height = PySpin.CIntegerPtr(nodemap.GetNode("Height"))
-        # if PySpin.IsAvailable(node_height) and PySpin.IsWritable(node_height):
-        #     height_to_set = node_height.GetMax()
-        #     node_height.SetValue(height_to_set)
-        #     print("Height set to {}...".format(node_height.GetValue()))
-        # else:
-        #     print("Height not available...")
         
 
         # get frame rate and other parameters
         self.seconds = 10
-        self.frame_rate = 75 # found on the spinnaker site for model: GS3-U3-51S5C-C in Blenman lab
-        print(self.frame_rate)
+        self.frame_rate = 75 # found on the spinnaker site for model: GS3-U3-51S5C-C
         self.num_images = round(self.frame_rate * self.seconds) # calculation based on number of frames per second
-        # print("frame rate: " + self.frame_rate)
 
         # initialize tkinter for video output
         self.window = tk.Tk()
         self.window.title("camera view")
-        width = str(IMAGE_WIDTH + 25) # why 25?
+        width = str(IMAGE_WIDTH + 25) 
         height = str(IMAGE_HEIGHT + 35)
         self.window.geometry(width + 'x' + height)
         self.imglabel = tk.Label(self.window)
         self.imglabel.place(x=10, y=20)
         self.window.update()
 
-        # self.cam.BeginAcquisition()
-        # print("here!")
         self.camera_preview()
-        # self.window.mainloop()
 
         # set up a thread to accelerate saving
           
@@ -157,7 +117,6 @@ class Grasshopper3Camera(Camera):
     def camera_preview(self):
         """ display preview of camera """
         """ references camera_open.m from eeDAP """
-        print("here??")
         # cam.AcquisitionMode.SetValue(PySpin.AcquisitionMode_SingleFrame)
         self.cam.BeginAcquisition()
         # width = image_primary.GetWidth()
