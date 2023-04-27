@@ -58,6 +58,8 @@ Under the folder `hardware_control/`:
 
 - `requirements.txt`: a text file containing the libraries that will be installed using pip, the package installer for Python. To install, run `pip install -r requirements.txt` from within a Python virtual environment
 
+- `.gitignore`: specifies intentionally untracked files that Git should ignore
+
 - `base_stage.py`: contains the abstract parent class BaseStage, for all stages. Currently, its only child class is PriorStage, but will be used as a parent class for all stages used by eeDAP (Ludl stages)
 
 - `check_ports.py`: auxiliary Python script to check for devices currently connected to the host computer via serial port

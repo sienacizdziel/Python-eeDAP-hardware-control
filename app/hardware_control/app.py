@@ -161,17 +161,28 @@ def admin_screen():
 @app.route('/camera', methods=['GET', 'POST'])
 def camera():
     """ 
-    Note: At the moment, the camera display route is not fully functional. Because the code uses a tkinter window, 
+    Successfully opens a tkinter display of the live video feed from a Grasshopper3 camera.
+
+    At the moment, the camera display route is not fully functional. Because the code 
+    uses a tkinter window, initializing the Grasshopper3Camera class immediately calls
+    the camera_preview method. When the tkinter window is closed, the program quits on an
+    error, and the final Response return is never reached. See project write-up for 
+    tips on how to address this issue.  
     """
     if request.method == 'POST':
         # cam.take_image() (TODO: does not successfully take photo via tkinter)
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
     else:
         print("showing live image")
+
+        # initialize Grasshopper3Camera (immediately opens display of live feed)
         cam = Grasshopper3Camera()
-        # note that at the moment this route does not work properly
-        # because the camera disp
+
+        # note that at the moment this route does not work properly,
+        # because once the tkinter window closes, the program quits
+        # so the following line is never reached
         return Response(cam.camera_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port='5000')
+    
